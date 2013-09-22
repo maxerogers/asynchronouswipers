@@ -15,6 +15,9 @@ public class BoardModel {
 	// The number of possible "directions" in which Order could win
 	private int orderedWinPossibilities;
 	
+	//A number representing the winner of the game. 1 if order, -1 if chaos, 0 if otherwise
+	private int winner;
+	
 	
 	/**
 	 * A constructor for objects of the BoardModel class.
@@ -28,6 +31,7 @@ public class BoardModel {
 			this.size = size;
 			orderedSymbolsRequired = size - 1;
 			orderedWinPossibilities = 2 * size + 6;
+			winner = 0;
 			squares = new Square[size][size];
 			fillGridEmpty();
 		}
@@ -94,70 +98,30 @@ public class BoardModel {
 	}
 	
 	/**
-	 * Returns an integer correspoding to the winner of the game. 
+	 * Returns an integer corresponding to the winner of the game. 
 	 * @return An int representing the winner of the game. Returns 0 if there is no winner,
 	 * 1 if the winner is order, or -1 if the order is chaos.
 	 */
 	public int getWinner() {
-		int winner = 0;
 		for(int row = 0; 0 < size && orderedWinPossibilities > 0 && winner != 1; row++) {
-			switch(checkDirection(row, 0, 0, 1)) {
-				case -1: orderedWinPossibilities--;
-					break;
-				case 1: winner = 1;
-					break;
-			}
+			checkDirection(row, 0, 0, 1);
 		}
 		for(int col = 0; 0 < size && orderedWinPossibilities > 0 && winner != 1; col++) {
-			switch(checkDirection(0, col, 1, 0)) {
-				case -1: orderedWinPossibilities--;
-					break;
-				case 1: winner = 1;
-					break;
-			}		
+			checkDirection(0, col, 1, 0);
 		}
-		switch(checkDirection(1, 0, 1, 1)) {
-			case -1: orderedWinPossibilities--;
-				break;
-			case 1: winner = 1;
-				break;
-		}
-		switch(checkDirection(0, 0, 1, 1)) {
-			case -1: orderedWinPossibilities--;
-				break;
-			case 1: winner = 1;
-				break;
-		}
-		switch(checkDirection(1, 0, 1, 1)) {
-			case -1: orderedWinPossibilities--;
-				break;
-			case 1: winner = 1;
-				break;
-		}
-		switch(checkDirection(0, size - 2, 1, -1)) {
-			case -1: orderedWinPossibilities--;
-				break;
-			case 1: winner = 1;
-				break;
-		}
-		switch(checkDirection(0, size -1, 1, -1)) {
-			case -1: orderedWinPossibilities--;
-				break;
-			case 1: winner = 1;
-				break;
-		}
-		switch(checkDirection(1, size - 1, 1, -1)) {
-			case -1: orderedWinPossibilities--;
-				break;
-			case 1: winner = 1;
-				break;
-		}
+		checkDirection(1, 0, 1, 1);
+		checkDirection(0, 0, 1, 1);
+		checkDirection(1, 0, 1, 1);
+		checkDirection(0, size - 2, 1, -1);
+		checkDirection(0, size -1, 1, -1);
+		checkDirection(1, size - 1, 1, -1);
 		return winner;
 	}
 	
 	
 	/*
-	 * Checks a given direction to check to see if Order has won the row or still can. 
+	 * Checks a given direction to check to see if Order has won the row or still can. Updates
+	 * instance fields to more easily track changes to the Board's state.
 	 * @param row An int representing a starting square's row number
 	 * @param col An int representing a starting square's column number
 	 * @param rowDelta An int representing by what the row number should be incremented
@@ -183,6 +147,12 @@ public class BoardModel {
 			row += rowDelta;
 			col += colDelta;
 		}
+		if(check == 1)
+			winner = 1;
+		else if(check < 0)
+			orderedWinPossibilities--;
+		if(orderedWinPossibilities <= 0)
+			winner = -1;
 		return check;
 	}
 	/*
