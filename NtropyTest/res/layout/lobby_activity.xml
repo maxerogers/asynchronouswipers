@@ -42,11 +42,23 @@
             tools:ignore="UselessParent" >
         </LinearLayout>
 
-        <Button
-            android:id="@+id/matchmaking"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="@string/matchmaking" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/matchmaking"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:text="@string/matchmaking" />
+
+            <Button
+                android:id="@+id/log_out"
+                android:layout_width="match_parent"
+                android:layout_height="62dp"
+                android:text="@string/log_out" />
+        </LinearLayout>
 
     </FrameLayout>
 

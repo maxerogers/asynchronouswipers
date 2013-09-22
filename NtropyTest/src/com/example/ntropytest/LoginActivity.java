@@ -33,6 +33,7 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		getIntent().putExtra("activity", "login");
 		Parse.initialize(this, "cEdvJbKLIg9bqIjFls3pcjaA0qDqRcJ6l5DSz4vg", "LNOpRZfkZkKsIqgoKwMkji41QPPWg1vKtXPzSSf5");
 		ParseAnalytics.trackAppOpened(getIntent());
 		setContentView(R.layout.login_activity);
@@ -76,25 +77,29 @@ public class LoginActivity extends Activity {
 			public void onClick(View v) {
 				//Sign Up
 				if(signInToggle.isChecked()) {
-					if(!password.getText().toString().equals(passwordConfirm.getText().toString()) || !username.getText().toString().equals("")) {
-						passwordFailure.setVisibility(View.VISIBLE);
-						success.setVisibility(View.GONE);
-					} else {
-						passwordFailure.setVisibility(View.GONE);
-						user.setPassword(password.getText().toString());
-						user.setUsername(username.getText().toString());
-						user.signUpInBackground(new SignUpCallback() {
-							public void done(ParseException e) {
-								if (e == null) {
-									success.setVisibility(View.VISIBLE);
-									Intent i = new Intent(LoginActivity.this, LobbyActivity.class);
-									startActivity(i);
-								} else {
-									usernameTaken.setVisibility(View.VISIBLE);
-									success.setVisibility(View.GONE);
+					if(!username.getText().toString().equals("")) {
+						if(!password.getText().toString().equals(passwordConfirm.getText().toString())) {
+							passwordFailure.setVisibility(View.VISIBLE);
+							success.setVisibility(View.GONE);
+						} else {
+							passwordFailure.setVisibility(View.GONE);
+							user.setPassword(password.getText().toString());
+							user.setUsername(username.getText().toString());
+							user.put("status", true);
+							user.signUpInBackground(new SignUpCallback() {
+								public void done(ParseException e) {
+									if (e == null) {
+										success.setVisibility(View.VISIBLE);
+										Intent i = new Intent(LoginActivity.this, LobbyActivity.class);
+										i.putExtra("id", username.getText().toString());
+										startActivity(i);
+									} else {
+										usernameTaken.setVisibility(View.VISIBLE);
+										success.setVisibility(View.GONE);
+									}
 								}
-							}
-						});
+							});
+						}
 					}
 					//Sign In
 				} else {
@@ -107,7 +112,12 @@ public class LoginActivity extends Activity {
 						public void done(ParseUser userDone, ParseException e)
 						{
 							if(userDone != null) {
+								user.setPassword(password.getText().toString());
+								user.setUsername(username.getText().toString());
+								user.put("status", true);
+								user.saveInBackground();
 								Intent i = new Intent(LoginActivity.this, LobbyActivity.class);
+								i.putExtra("id", username.getText().toString());
 								startActivity(i);
 							}else {
 								noMatch.setVisibility(View.VISIBLE);

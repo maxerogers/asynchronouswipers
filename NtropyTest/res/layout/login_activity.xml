@@ -49,6 +49,11 @@
             android:layout_gravity="bottom"
             android:orientation="vertical" >
 
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="242dp"
+                android:layout_height="56dp"/>
+
             <ToggleButton
                 android:id="@+id/sign_in_toggle"
                 android:layout_width="238dp"
@@ -102,7 +107,7 @@
                 android:text="@string/passwords_do_not_match"
                 android:textColor="@color/white"
                 android:textSize="25sp" />
-            
+
             <TextView
                 android:id="@+id/no_match_text"
                 android:layout_width="match_parent"
@@ -110,7 +115,7 @@
                 android:text="@string/no_match"
                 android:textColor="@color/white"
                 android:textSize="25sp" />
-            
+
             <TextView
                 android:id="@+id/success_text"
                 android:layout_width="match_parent"
