@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">NtropyTest</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="submit">Submit</string>
+    <string name="username_taken">Username Taken</string>
+    <string name="passwords_do_not_match">Passwords Do Not Match</string>
+    <string name="title_activity_lobby">LobbyActivity</string>
+    <string name="no_match">No Such Combination of Username and Password Exists</string>
+    <string name="success">You have successfully signed up!</string>
+    <string name="matchmaking">Matchmaking</string>
+    <string name="title_activity_game">GameActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="log_out">Log Out</string>
+    <string name="title_activity_push">PushActivity</string>
+    <string name="yes">Send Move</string>
+    <string name="no">Cancel</string>
+    <string name="dialog_submit_move">Are you sure you want to end your turn?</string>
+
+</resources>
