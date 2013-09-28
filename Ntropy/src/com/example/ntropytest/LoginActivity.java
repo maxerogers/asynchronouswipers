@@ -27,8 +27,6 @@ import android.widget.ToggleButton;
  * @see SystemUiHider
  */
 public class LoginActivity extends Activity {
-
-	ParseUser user = new ParseUser();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,9 +81,10 @@ public class LoginActivity extends Activity {
 							success.setVisibility(View.GONE);
 						} else {
 							passwordFailure.setVisibility(View.GONE);
+							ParseUser user = new ParseUser();
 							user.setPassword(password.getText().toString());
 							user.setUsername(username.getText().toString());
-							user.put("status", true);
+							user.put("status", "waiting");
 							user.signUpInBackground(new SignUpCallback() {
 								public void done(ParseException e) {
 									if (e == null) {
@@ -112,10 +111,10 @@ public class LoginActivity extends Activity {
 						public void done(ParseUser userDone, ParseException e)
 						{
 							if(userDone != null) {
-								user.setPassword(password.getText().toString());
-								user.setUsername(username.getText().toString());
-								user.put("status", true);
-								user.saveInBackground();
+								userDone.setPassword(password.getText().toString());
+								userDone.setUsername(username.getText().toString());
+								userDone.put("status", "waiting");
+								userDone.saveInBackground();
 								Intent i = new Intent(LoginActivity.this, LobbyActivity.class);
 								i.putExtra("id", username.getText().toString());
 								startActivity(i);

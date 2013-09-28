@@ -31,13 +31,13 @@ import com.parse.PushService;
  * @see SystemUiHider
  */
 public class LobbyActivity extends Activity {
-	
+
 	private static final String TAG = "MyCustomReceiver";
 
 	String id;
-	
+
 	String gameId;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -47,113 +47,131 @@ public class LobbyActivity extends Activity {
 		Parse.initialize(this, "cEdvJbKLIg9bqIjFls3pcjaA0qDqRcJ6l5DSz4vg", "LNOpRZfkZkKsIqgoKwMkji41QPPWg1vKtXPzSSf5");
 
 		overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-		
+
 		setContentView(R.layout.lobby_activity);
 
 		final View controlsView = findViewById(R.id.fullscreen_content_controls);
 		final View contentView = findViewById(R.id.fullscreen_content);
-		
+
 		final Button matchmaking = (Button) findViewById(R.id.matchmaking);
 		matchmaking.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				
 				PushService.unsubscribe(getBaseContext(), "lobby");
-				
-				ParseQuery<ParseUser> query = ParseUser.getQuery();
-				query.whereEqualTo("objectId", id);
-				query.findInBackground(new FindCallback<ParseUser>() {
-					public void done(List<ParseUser> objects, ParseException e) {
-						if (e == null) {
-							Iterator<ParseUser> it = objects.iterator();
-							final ParseUser player = it.next();
-							player.put("status", "searching");
-							player.saveInBackground();
-							
-							ParseQuery<ParseUser> query = ParseUser.getQuery();
-							query.whereEqualTo("status", "waiting");
-							query.findInBackground(new FindCallback<ParseUser>() {
-								public void done(List<ParseUser> objects, ParseException e) {
-									if (e == null) {
-										Iterator<ParseUser> it = objects.iterator();
-										final ParseUser opponent = it.next();
-										opponent.put("status", "inGame");
-										opponent.saveInBackground();
 
-										ParseQuery<ParseUser> query = ParseUser.getQuery();
-										query.whereEqualTo("objectId", id);
-										query.findInBackground(new FindCallback<ParseUser>() {
-											public void done(List<ParseUser> objects, ParseException e) {
-												if (e == null) {
-													Iterator<ParseUser> it = objects.iterator();
-													ParseUser player = it.next();
-													player.put("status", "inGame");
-													player.saveInBackground();
+				final ParseUser player = ParseUser.getCurrentUser();
+				player.put("status", "searching");
+				player.saveInBackground();
 
-													ParseObject game = new ParseObject("game");
-													game.put("playerA", id);
-													game.put("PlayerB", opponent.get("objectId"));
-													String gameId = game.getString("objectId");
-													getIntent().putExtra("opponentType", "b");
-													game.saveInBackground();
-													gameId = game.getString("objectId");
-													
-													ParsePush push = new ParsePush();
-													JSONObject json = new JSONObject();
-													try {
-														json.put("action", "com.example.UPDATE_STATUS");
-													} catch(JSONException ex) {
-														System.out.println(e);
-													}
-													push.setData(json);
-													push.setChannel("lobby");
-													String sub = game.get("objectId") + " a";
-													PushService.subscribe(getBaseContext(), sub, GameActivity.class);
-													push.setMessage((String) opponent.get("objectId") + " " +  gameId);
-													push.sendInBackground();
-												
-													
-
-													//TODO
-													//Push P2 to GameActivity
-												}
-											}
-										});
-									}
-								}
-							});
-						}
-					}
-				});
-				
-				
-				Intent i = new Intent(LobbyActivity.this, GameActivity.class);
-				i.putExtra("id", id);
-				i.putExtra("gameId", gameId);
-				startActivity(i);
+				gameSearch();
 			}
 		});
-		
+
 		final Button logOut = (Button) findViewById(R.id.log_out);
 		logOut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				ParseQuery<ParseUser> query = ParseUser.getQuery();
-				query.whereEqualTo("username", id);
-				query.findInBackground(new FindCallback<ParseUser>() {
-				  public void done(List<ParseUser> objects, ParseException e) {
-				    if (e == null) {
-				        Iterator<ParseUser> it = objects.iterator();
-				        ParseUser object = it.next();
-				        object.put("status", false);
-				    } else {
-				        // Something went wrong.
-				    }
-				  }
-				});
+				logOut();
 			}
 		});
 		PushService.subscribe(getBaseContext(), "lobby", LobbyActivity.class);
-	
+
 	}
-	
+
+	/**
+	 * Logs this player out and sends back to login screen
+	 */
+	private void logOut() {
+		ParseQuery<ParseUser> query = ParseUser.getQuery();
+		query.whereEqualTo("username", id);
+		ParseUser object = ParseUser.getCurrentUser();
+		object.put("status", "offline");
+		object.saveInBackground();
+		object.logOut();
+		Intent i = new Intent(LobbyActivity.this, LoginActivity.class);
+		startActivity(i);
+	}
+
+	/**
+	 * Sends this player to his game
+	 */
+	private void goToGame() {
+		Intent i = new Intent(LobbyActivity.this, GameActivity.class);
+		i.putExtra("id", id);
+		i.putExtra("gameId", gameId);
+		startActivity(i);
+	}
+
+	/**
+	 * Change this player's status to inGame and send the push notification to the opponent
+	 * @param opponent
+	 * @param player
+	 */
+	private void gameMatchSuccess(final ParseUser opponent) {
+		System.out.println("matchSuccess");
+		
+		ParseUser player = ParseUser.getCurrentUser();
+		player.put("status", "inGame");
+		player.saveInBackground();
+
+		ParseObject game = new ParseObject("game");
+		game.put("playerA", id);
+		game.put("PlayerB", opponent.get("objectId"));
+		String gameId = game.getString("objectId");
+		getIntent().putExtra("opponentType", "b");
+		game.saveInBackground();
+		gameId = game.getString("objectId");
+
+		ParsePush push = new ParsePush();
+		JSONObject json = new JSONObject();
+		try {
+			json.put("action", "com.example.UPDATE_STATUS");
+		} catch(JSONException ex) {
+			System.out.println(ex);
+		}
+		push.setData(json);
+		push.setChannel("lobby");
+		String sub = game.get("objectId") + " a";
+		PushService.subscribe(getBaseContext(), sub, GameActivity.class);
+		push.setMessage((String) opponent.get("objectId") + " " +  gameId);
+		push.sendInBackground();
+	}
+
+	/**
+	 * Find opponent to play against and set the opponent's status to inGame
+	 * @param player
+	 */
+	private void gameSearch() {
+		System.out.println("search");
+		
+		final ParseUser player = ParseUser.getCurrentUser();
+		
+		try {
+			player.fetch();
+		} catch (ParseException e1) {
+		}
+				
+		ParseQuery<ParseUser> query = ParseUser.getQuery();
+		query.whereEqualTo("status", "waiting");
+		query.findInBackground(new FindCallback<ParseUser>() {
+			public void done(List <ParseUser> objects, ParseException e) {
+				if (e == null) {
+					Iterator<ParseUser> it = objects.iterator();
+					if(it.hasNext()) {
+						final ParseUser opponent = it.next();
+						opponent.put("status", "inGame");
+						opponent.saveInBackground();
+
+						gameMatchSuccess(opponent);
+						
+						goToGame();
+					} else {
+						player.put("status", "waiting");
+						player.saveInBackground();
+						
+						System.out.println("Queue failed");
+					}
+				}
+			}
+		});
+	}
 }
