@@ -76,9 +76,6 @@ public class GameActivity extends Activity  {
 		board = new BoardModel(STANDARD_SIZE);
 		
 		while(gameContinue) {
-			
-			
-			
 			while(notMyTurn) {
 				if(intent.getBooleanExtra("messageReceieved", false)) {
 					updateOpponentMove(intent);

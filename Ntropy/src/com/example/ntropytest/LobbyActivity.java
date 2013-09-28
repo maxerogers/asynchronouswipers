@@ -41,8 +41,6 @@ public class LobbyActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		System.out.println(ParseUser.getCurrentUser().getUsername());
 		
 		id = getIntent().getExtras().getString("id");
 		getIntent().putExtra("activity", "lobby");
@@ -146,6 +144,12 @@ public class LobbyActivity extends Activity {
 		System.out.println("search");
 		
 		final ParseUser player = ParseUser.getCurrentUser();
+		
+		try {
+			player.fetch();
+		} catch (ParseException e1) {
+		}
+				
 		ParseQuery<ParseUser> query = ParseUser.getQuery();
 		query.whereEqualTo("status", "waiting");
 		query.findInBackground(new FindCallback<ParseUser>() {
